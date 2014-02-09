@@ -303,6 +303,9 @@ int main(int argc, char** argv)
 
     auto pANDatInterface = gw2dt::interface::createANDatInterface("C:\\Guild Wars 2\\Gw2.dat");
 
+	const char *baseidstr = argv[1];
+	int baseid = atoi(baseidstr);
+
 
     //auto aFileRecordVect = pANDatInterface->getFileRecordVect();
 
@@ -315,7 +318,7 @@ int main(int argc, char** argv)
 	uint32_t pimgbuffsize = 64*1024;
 	uint32_t pimgbuffsize2 = 64*1024;
 
-	auto pimg = pANDatInterface->getFileRecordForBaseId(100139);
+	auto pimg = pANDatInterface->getFileRecordForBaseId(baseid);
 	pANDatInterface->getBuffer(pimg, pimgbuffsize, pimgbuff);
 	gw2dt::compression::inflateDatFileBuffer(pimgbuffsize, pimgbuff, pimgbuffsize2, pimgbuff2);
 
