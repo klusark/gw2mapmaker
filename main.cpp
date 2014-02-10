@@ -64,45 +64,56 @@ struct BGR
     uint8_t   r;
 };
 
-struct wxSize {
-	uint16_t x;
-	uint16_t y;
+struct RGBA {
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a;
 };
 
-int writeImage(const char* filename, int width, int height, uint8_t *buffer)
+int writeImage(const char* filename, int width, int height, BGR *buffer, uint8_t *alpha)
 {
-   int code = 0;
-   FILE *fp = nullptr;
-   png_structp png_ptr;
-   png_infop info_ptr;
-   // Open file for writing (binary mode)
-   fopen_s(&fp, filename, "wb");
+	int code = 0;
+	FILE *fp = nullptr;
+	png_structp png_ptr;
+	png_infop info_ptr;
+	// Open file for writing (binary mode)
+	fopen_s(&fp, filename, "wb");
 
-     // Initialize write structure
-   png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	// Initialize write structure
+	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
-   // Initialize info structure
-   info_ptr = png_create_info_struct(png_ptr);
+	// Initialize info structure
+	info_ptr = png_create_info_struct(png_ptr);
 
-   png_init_io(png_ptr, fp);
+	png_init_io(png_ptr, fp);
 
-   // Write header (8 bit colour depth)
-   png_set_IHDR(png_ptr, info_ptr, width, height,
-         8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
-         PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+	// Write header (8 bit colour depth)
+	png_set_IHDR(png_ptr, info_ptr, width, height,
+		8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
+		PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
 	png_write_info(png_ptr, info_ptr);
 
+	RGBA *data = new RGBA[width*height];
 
-   // Write image data
+	for (int i = 0; i < width*height; ++i) {
+		data[i].a = alpha[i];
+		data[i].r = buffer[i].b;
+		data[i].g = buffer[i].g;
+		data[i].b = buffer[i].r;
+	}
 
-   for (int y=0 ; y<height ; y++) {
-      png_write_row(png_ptr, buffer + y*width*3);
-   }
-    png_write_end(png_ptr, NULL);
-   if (fp != NULL) fclose(fp);
-   if (info_ptr != NULL) png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
-   if (png_ptr != NULL) png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
+
+	// Write image data
+
+	for (int y=0 ; y<height ; y++) {
+		png_write_row(png_ptr, (uint8_t *)data + y*width*4);
+	}
+	png_write_end(png_ptr, NULL);
+	if (fp != NULL) fclose(fp);
+	if (info_ptr != NULL) png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
+	if (png_ptr != NULL) png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
 	return 0;
 }
 
@@ -207,7 +218,7 @@ void processDXT5(const BGRA* p_data, uint32_t p_width, uint32_t p_height, BGR *&
     }
 }
 
-void readATEX(wxSize& po_size, BGR*& po_colors, uint8_t*& po_alphas, void *d)
+void readATEX(uint32_t width, uint32_t height, BGR*& po_colors, uint8_t*& po_alphas, void *d)
 {
    // Assert(isValidHeader(m_data.GetPointer(), m_data.GetSize()));
    // auto atex = reinterpret_cast<const ANetAtexHeader*>(d);
@@ -259,7 +270,7 @@ void readATEX(wxSize& po_size, BGR*& po_colors, uint8_t*& po_alphas, void *d)
     case FCC_DXT4:
     case FCC_DXT5:*/
        // if (::AtexDecompress(data, m_data.GetSize(), 0x13, descriptor, reinterpret_cast<uint*>(output))) {
-            processDXT5(data, 512, 512, po_colors, po_alphas);
+            processDXT5(data, width, height, po_colors, po_alphas);
         //}
        // break;
     /*case FCC_DXTA:
@@ -301,7 +312,7 @@ int main(int argc, char** argv)
 {
 	const uint32_t aBufferSize = 1024 * 1024 * 30; // We make the assumption that no file is bigger than 30 M
 
-    auto pANDatInterface = gw2dt::interface::createANDatInterface("C:\\Guild Wars 2\\Gw2.dat");
+    auto pANDatInterface = gw2dt::interface::createANDatInterface("T:\\Games\\Guild Wars 2\\Gw2.dat");
 
 	const char *baseidstr = argv[1];
 	int baseid = atoi(baseidstr);
@@ -330,22 +341,24 @@ int main(int argc, char** argv)
 	for (uint32_t i = 0; i < pages.size(); ++i) {
 		auto page = pages[i];
 		auto coord = page.coord;
-		std::cout << coord[0] << " " << coord[1] << std::endl;
+		int c = page.filename.lowPart();
 		int a = page.filename.fileId();
 		if (a == 0) {
 			continue;
 		}
 
+
 		uint32_t aOriSize = aBufferSize;
 		auto it = pANDatInterface->getFileRecordForBaseId(a);
 		pANDatInterface->getBuffer(it, aOriSize, pOriBuffer);
 
-		std::cout << "Processing File " << it.fileId << std::endl;
+		std::cout << "Processing File " << a << std::endl;
 
 		//std::ofstream aOFStream;
 		std::ostringstream oss2;
-		oss2 << "mkdir " << coord[1];
-		system(oss2.str().c_str());
+		oss2 << coord[1];
+		CreateDirectoryA(oss2.str().c_str(), NULL);
+		//system(oss2.str().c_str());
 		//CreateDirectory(oss2.str(), NULL);
 		std::ostringstream oss;
 
@@ -363,19 +376,16 @@ int main(int argc, char** argv)
 
 			BGR* colors   = nullptr;
 			uint8_t* alphas = nullptr;
-			wxSize size;
-			size.x = 512;
-			size.y = 512;
 
 			try	{
 				gw2dt::compression::inflateDatFileBuffer(aOriSize, pOriBuffer, aInfSize, pInfBuffer);
 				gw2f::TextureFile tex(pInfBuffer, aInfSize);
 				auto &mipmap = tex.mipMapLevel(0);
 				gw2dt::compression::inflateTextureBlockBuffer(mipmap.width(), mipmap.height(), mipmap.format(), mipmap.size(), mipmap.data(), aInfSize2, pInfBuffer2);
-				readATEX(size, colors, alphas, pInfBuffer2);
+				readATEX(mipmap.width(), mipmap.height(), colors, alphas, pInfBuffer2);
 				//gw2dt::compression::inflateTextureFileBuffer(aInfSize, pInfBuffer, aInfSize2, pInfBuffer2);
 				//aOFStream.write(reinterpret_cast<const char*>(colors), 512*512*3);
-				writeImage(filename.c_str(), 512,512,reinterpret_cast<uint8_t*>(colors));
+				writeImage(filename.c_str(), mipmap.width(), mipmap.height(), colors, alphas);
 				delete colors;
 				delete alphas;
 			} catch(std::exception& iException) {
