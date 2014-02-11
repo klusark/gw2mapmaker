@@ -15,4 +15,5 @@ src/dxt.h
 )
 
 add_executable(gw2mapmaker ${SOURCES} ${HEADERS})
+target_link_libraries(gw2mapmaker png gw2formats gw2DatTools)
 
