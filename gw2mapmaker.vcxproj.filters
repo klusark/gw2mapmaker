@@ -15,18 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="src\dxt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dxt.cpp">
+    <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dxt.h">
+    <ClInclude Include="src\dxt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="main.h">
+    <ClInclude Include="src\main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
