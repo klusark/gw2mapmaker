@@ -86,9 +86,9 @@ int main(int argc, char** argv)
 {
 	const uint32_t aBufferSize = 1024 * 1024 * 30; // We make the assumption that no file is bigger than 30 M
 
-	auto pANDatInterface = gw2dt::interface::createANDatInterface("/home/joel/Gw2.dat");
+	auto pANDatInterface = gw2dt::interface::createANDatInterface(argv[1]);
 
-	char *baseidstr = argv[1];
+	char *baseidstr = argv[2];
 	int baseid = atoi(baseidstr);
 
 	uint8_t* pOriBuffer = new uint8_t[aBufferSize];

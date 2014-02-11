@@ -4,6 +4,7 @@ from PIL import Image
 from PIL import PngImagePlugin
 import os
 import glob
+import json
 
 def allBlack(im):
 	c = im.getcolors();
@@ -15,31 +16,38 @@ def ensureDir(dir):
 	if not os.path.exists(dir):
 		os.makedirs(dir);
 
-def pngSave(im, x, y, rect):
+def pngSave(im, x, y, rect, layer):
 	meta = PngImagePlugin.PngInfo();
 	meta.add_text("Comment", im.info["Comment"]);
 	im1 = im.crop(rect);
 	if (allBlack(im1) == False):
-		im1.save("out/"+str(x)+"/"+str(y)+".png", "PNG", pnginfo = meta);
+		ensureDir("out/"+str(layer)+"/7/"+str(x));
+		im1.save("out/" + str(layer) + "/7/" + str(x) + "/" + str(y)+".png", "PNG", pnginfo = meta);
 
 def outputImage(name):
 	s = name.split("/");
+	pimg = s[0];
+	layer = 1
+	if (pimg in layers):
+		layer = layers[pimg]
 	y = int(s[1]);
 	x = int(s[2].split(".")[0]);
 	x2 = x*2;
 	y2 = y*2;
 	im = Image.open(name);
 
-	ensureDir("out/"+str(x2));
-	ensureDir("out/"+str(x2+1));
+	size = im.size;
+	if (size[0] == 1024):
+		im.thumbnail((512,512), Image.ANTIALIAS);
 
-	pngSave(im, x2, y2, (0,0,256,256));
+	numsub = 2;
 
-	pngSave(im, x2+1, y2, (256,0,512,256));
+	for i in range(numsub):
+		for j in range(numsub):
+			pngSave(im, x2+i, y2+j, (i*256,j*256,(i+1)*256,(j+1)*256), layer);
 
-	pngSave(im, x2, y2+1, (0,256,256,512));
 
-	pngSave(im, x2+1, y2+1, (256,256,512,512));
+layers = json.load(open("/home/joel/layers.json"))
 
 for file in glob.glob("*/*/*.png"):
 	print("processing " + file);
