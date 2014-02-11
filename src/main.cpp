@@ -78,6 +78,7 @@ int writeImage(const char* filename, int width, int height, BGR *buffer, uint8_t
 	if (fp != NULL) fclose(fp);
 	if (info_ptr != NULL) png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
 	if (png_ptr != NULL) png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
+	delete[] data;
 	return 0;
 }
 
@@ -90,11 +91,9 @@ int main(int argc, char** argv)
 	char *baseidstr = argv[1];
 	int baseid = atoi(baseidstr);
 
-    //auto aFileRecordVect = pANDatInterface->getFileRecordVect();
-
-    uint8_t* pOriBuffer = new uint8_t[aBufferSize];
+	uint8_t* pOriBuffer = new uint8_t[aBufferSize];
 	uint8_t* pInfBuffer2 = new uint8_t[aBufferSize];
-    uint8_t* pInfBuffer = new uint8_t[aBufferSize];
+	uint8_t* pInfBuffer = new uint8_t[aBufferSize];
 	uint8_t* pimgbuff = new uint8_t[64*1024];
 	uint8_t* pimgbuff2 = new uint8_t[64*1024];
 
@@ -105,9 +104,8 @@ int main(int argc, char** argv)
 	pANDatInterface->getBuffer(pimg, pimgbuffsize, pimgbuff);
 	gw2dt::compression::inflateDatFileBuffer(pimgbuffsize, pimgbuff, pimgbuffsize2, pimgbuff2);
 
-    // Open the given eula file
-    gw2f::pf::PimgPackFile eula(pimgbuff2, pimgbuffsize2);
-    auto chunk = eula.chunk<gw2f::pf::PagedImageChunks::PGTB>();
+	gw2f::pf::PimgPackFile eula(pimgbuff2, pimgbuffsize2);
+	auto chunk = eula.chunk<gw2f::pf::PagedImageChunks::PGTB>();
 
 	auto pages = chunk.get()->strippedPages;
 	for (uint32_t i = 0; i < pages.size(); ++i) {
@@ -172,6 +170,11 @@ int main(int argc, char** argv)
 			//aOFStream.write(reinterpret_cast<const char*>(pOriBuffer), aOriSize);
 		}
 	}
-
-    return 0;
+	delete[] pOriBuffer;
+	delete[] pInfBuffer2;
+	delete[] pInfBuffer;
+	delete[] pimgbuff;
+	delete[] pimgbuff2;
+    
+	return 0;
 }
