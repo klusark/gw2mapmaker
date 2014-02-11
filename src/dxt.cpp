@@ -49,7 +49,7 @@ struct Vec3 {
 		data[1] = b;
 		data[2] = c;
 	}
-	void operator =(Vec3 &other) {
+	void operator =(const Vec3 &other) {
 		data[0] = other.data[0];
 		data[1] = other.data[1];
 		data[2] = other.data[2];
