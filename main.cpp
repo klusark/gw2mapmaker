@@ -1,5 +1,7 @@
+#ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#endif
 
 #include <iostream>
 
@@ -28,7 +30,7 @@ int writeImage(const char* filename, int width, int height, BGR *buffer, uint8_t
 	png_structp png_ptr;
 	png_infop info_ptr;
 	// Open file for writing (binary mode)
-	fopen_s(&fp, filename, "wb");
+	fp = fopen(filename, "wb");
 
 	// Initialize write structure
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -115,7 +117,9 @@ int main(int argc, char** argv)
 		//std::ofstream aOFStream;
 		std::ostringstream oss2;
 		oss2 << coord[1];
+#ifdef WIN32
 		CreateDirectoryA(oss2.str().c_str(), NULL);
+#endif
 		//system(oss2.str().c_str());
 		//CreateDirectory(oss2.str(), NULL);
 		std::ostringstream oss;
