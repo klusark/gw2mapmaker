@@ -1,6 +1,8 @@
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#else
+#include <sys/stat.h>
 #endif
 
 #include <iostream>
@@ -47,7 +49,9 @@ int writeImage(const char* filename, int width, int height, BGR *buffer, uint8_t
 
 	png_text text;
 	text.compression = PNG_TEXT_COMPRESSION_NONE;
-	text.key = "Comment";
+	char buff[16];
+	strcpy(buff, "Comment");
+	text.key = buff;
 	text.text = pimg;
 	text.text_length = strlen(text.text);
 
@@ -81,7 +85,7 @@ int main(int argc, char** argv)
 {
 	const uint32_t aBufferSize = 1024 * 1024 * 30; // We make the assumption that no file is bigger than 30 M
 
-    auto pANDatInterface = gw2dt::interface::createANDatInterface("T:\\Games\\Guild Wars 2\\Gw2.dat");
+	auto pANDatInterface = gw2dt::interface::createANDatInterface("/home/joel/Gw2.dat");
 
 	char *baseidstr = argv[1];
 	int baseid = atoi(baseidstr);
@@ -125,8 +129,11 @@ int main(int argc, char** argv)
 		//std::ofstream aOFStream;
 		std::ostringstream oss2;
 		oss2 << coord[1];
+		const char *dirname = oss2.str().c_str();
 #ifdef WIN32
-		CreateDirectoryA(oss2.str().c_str(), NULL);
+		CreateDirectoryA(dirname, NULL);
+#else
+		mkdir(dirname, 0755);
 #endif
 		//system(oss2.str().c_str());
 		//CreateDirectory(oss2.str(), NULL);
