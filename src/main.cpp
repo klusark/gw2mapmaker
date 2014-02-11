@@ -23,7 +23,7 @@
 #include "dxt.h"
 
 
-int writeImage(const char* filename, int width, int height, BGR *buffer, uint8_t *alpha)
+int writeImage(const char* filename, int width, int height, BGR *buffer, uint8_t *alpha, char *pimg)
 {
 	int code = 0;
 	FILE *fp = nullptr;
@@ -44,6 +44,14 @@ int writeImage(const char* filename, int width, int height, BGR *buffer, uint8_t
 	png_set_IHDR(png_ptr, info_ptr, width, height,
 		8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
 		PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+
+	png_text text;
+	text.compression = PNG_TEXT_COMPRESSION_NONE;
+	text.key = "Comment";
+	text.text = pimg;
+	text.text_length = strlen(text.text);
+
+	png_set_text(png_ptr, info_ptr, (png_const_textp)&text, 1);
 
 	png_write_info(png_ptr, info_ptr);
 
@@ -75,7 +83,7 @@ int main(int argc, char** argv)
 
     auto pANDatInterface = gw2dt::interface::createANDatInterface("T:\\Games\\Guild Wars 2\\Gw2.dat");
 
-	const char *baseidstr = argv[1];
+	char *baseidstr = argv[1];
 	int baseid = atoi(baseidstr);
 
     //auto aFileRecordVect = pANDatInterface->getFileRecordVect();
@@ -147,7 +155,7 @@ int main(int argc, char** argv)
 				readATEX(mipmap.width(), mipmap.height(), colors, alphas, pInfBuffer2);
 				//gw2dt::compression::inflateTextureFileBuffer(aInfSize, pInfBuffer, aInfSize2, pInfBuffer2);
 				//aOFStream.write(reinterpret_cast<const char*>(colors), 512*512*3);
-				writeImage(filename.c_str(), mipmap.width(), mipmap.height(), colors, alphas);
+				writeImage(filename.c_str(), mipmap.width(), mipmap.height(), colors, alphas, baseidstr);
 				delete colors;
 				delete alphas;
 			} catch(std::exception& iException) {
