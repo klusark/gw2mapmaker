@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from PIL import Image
+from PIL import PngImagePlugin
 import os
 import glob
 
@@ -14,6 +15,13 @@ def ensureDir(dir):
 	if not os.path.exists(dir):
 		os.makedirs(dir);
 
+def pngSave(im, x, y, rect):
+	meta = PngImagePlugin.PngInfo();
+	meta.add_text("Comment", im.info["Comment"]);
+	im1 = im.crop(rect);
+	if (allBlack(im1) == False):
+		im1.save("out/"+str(x)+"/"+str(y)+".png", "PNG", pnginfo = meta);
+
 def outputImage(name):
 	s = name.split("/");
 	y = int(s[1]);
@@ -21,24 +29,17 @@ def outputImage(name):
 	x2 = x*2;
 	y2 = y*2;
 	im = Image.open(name);
+
 	ensureDir("out/"+str(x2));
 	ensureDir("out/"+str(x2+1));
-	im1 = im.crop((0,0,256,256));
-	im1.load();
-	if (allBlack(im1) == False):
-		im1.save("out/"+str(x2)+"/"+str(y2)+".png");
 
-	im2 = im.crop((256,0,512,256));
-	if (allBlack(im2) == False):
-		im2.save("out/"+str(x2+1)+"/"+str(y2)+".png");
+	pngSave(im, x2, y2, (0,0,256,256));
 
-	im3 = im.crop((0,256,256,512));
-	if (allBlack(im3) == False):
-		im3.save("out/"+str(x2)+"/"+str(y2+1)+".png");
+	pngSave(im, x2+1, y2, (256,0,512,256));
 
-	im4 = im.crop((256,256,512,512));
-	if (allBlack(im4) == False):
-		im4.save("out/"+str(x2+1)+"/"+str(y2+1)+".png");
+	pngSave(im, x2, y2+1, (0,256,256,512));
+
+	pngSave(im, x2+1, y2+1, (256,256,512,512));
 
 for file in glob.glob("*/*/*.png"):
 	print("processing " + file);
