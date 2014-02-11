@@ -163,8 +163,8 @@ int main(int argc, char** argv)
 				//gw2dt::compression::inflateTextureFileBuffer(aInfSize, pInfBuffer, aInfSize2, pInfBuffer2);
 				//aOFStream.write(reinterpret_cast<const char*>(colors), 512*512*3);
 				writeImage(filename.c_str(), mipmap.width(), mipmap.height(), colors, alphas, baseidstr);
-				delete colors;
-				delete alphas;
+				delete[] colors;
+				delete[] alphas;
 			} catch(std::exception& iException) {
 				std::cout << "File " << it.fileId << " failed to decompress: " << std::string(iException.what()) << std::endl;
 			}
