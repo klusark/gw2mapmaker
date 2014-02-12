@@ -11,7 +11,7 @@ def processImage(newimage, x, y, pos):
 	except:
 		None
 
-for tolayer in (5,4,3,2,1):
+for tolayer in (6,5,4,3,2,1):
 
 	layermax = 2**tolayer
 
