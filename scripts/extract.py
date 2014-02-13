@@ -3,7 +3,9 @@
 import json
 import subprocess
 import os
-file = open("/home/joel/out.json")
+import sys
+
+file = open(sys.argv[1])
 arr = json.load(file)
 
 def ensureDir(dir):

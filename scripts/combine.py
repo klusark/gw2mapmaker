@@ -15,7 +15,7 @@ for tolayer in (6,5,4,3,2,1):
 
 	layermax = 2**tolayer
 
-	basepath = "tiles/1/1/"+str(tolayer+1);
+	basepath = "out/squish/"+str(tolayer+1);
 	filetype = ".png"
 
 
@@ -38,9 +38,9 @@ for tolayer in (6,5,4,3,2,1):
 
 			newimage.thumbnail((256,256), Image.ANTIALIAS);
 
-			dir = "tiles/1/1/"+str(tolayer)+"/"+str(x);
+			dir = "out/squish/"+str(tolayer)+"/"+str(x);
 			if not os.path.exists(dir):
 				os.makedirs(dir);
 			out = dir + "/" + str(y) + filetype
 			newimage.save(out);
-			
+

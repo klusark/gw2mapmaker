@@ -5,8 +5,9 @@ from PIL import PngImagePlugin
 import os
 import glob
 import json
+import sys
 
-red = Image.new("RGB", (256,256), "red")
+red = Image.new("RGBA", (256,256), "red")
 
 pimg2tile = {}
 tile2pimg = {}
@@ -26,8 +27,8 @@ def pngSave(im, x, y, rect, layer, pimg):
 	meta.add_text("Comment", im.info["Comment"]);
 	im1 = im.crop(rect);
 	if (allBlack(im1) == False):
-		ensureDir("out/"+str(layer)+"/7/"+str(x));
-		filename = "out/" + str(layer) + "/7/" + str(x) + "/" + str(y)+".png";
+		ensureDir("out/tiles/"+str(layer)+"/7/"+str(x));
+		filename = "out/tiles/" + str(layer) + "/7/" + str(x) + "/" + str(y)+".png";
 		retval = 0;
 		if (os.path.exists(filename)):
 			print(filename + " already exists. Fix it.");
@@ -77,7 +78,7 @@ def outputImage(name):
 					tile2pimg[pos] = []
 				tile2pimg[pos].insert(0, pimg)
 
-layers = json.load(open("/home/joel/layers.json"))
+layers = json.load(open(sys.argv[1]))
 
 for file in glob.glob("*/*/*.png"):
 	#print("processing " + file);
